@@ -4,9 +4,11 @@ import urllib2
 import html5lib
 import time
 from argparse import ArgumentParser 
+from colorama import init, Fore, Back, Style
+import re
 
+init(autoreset=True) #needed to clear and initalize colorama
 
-#url = 'http://www.cnbc.com/pre-markets/'
 url = 'http://www.bloomberg.com/markets/stocks/futures'
 gasupport = ""
 garesistance = ""
@@ -25,17 +27,20 @@ hangsengprice = ""
 hangsengchange = ""
 nikkeiprice = ""
 nikkeichange = ""
+gacolorize = ""
 
 
 def getArgs():
-	global gasupport, garesistance
+	global gasupport, garesistance, gacolorize
 	parser = ArgumentParser(description = 'Get Arguments')
 	parser.add_argument("-s", "--support", required=False, dest="support", help="Initialize S&P support level", metavar="support")
 	parser.add_argument("-r", "--resistance", required=False, dest="resistance", help="Initialize S&P resistance level", metavar="resistance")
+	parser.add_argument("-c", "--colorize", required=False, action="store_true", dest="colorize", help="Colorize support and resistance")
 	args = parser.parse_args()
 	gasupport = args.support
 	garesistance = args.resistance
-	return (gasupport, garesistance)
+	gacolorize = args.colorize
+	return (gasupport, garesistance, gacolorize)
 
 def getSoup():
 	global url, target
@@ -68,7 +73,7 @@ def printReport():
 	print "S&P resistance Set: " + garesistance
 	print "DOW Price: " + dowprice
 	print "DJIA Change: " + dowchange
-	print "S&P 500: " + spprice
+	print "S&P 500: " + (spprice)
 	print "S&P 500 Change: " + spchange
 	print "NASDAQ: " + nasdaqprice
 	print "NASDAQ: Change: "+ nasdaqchange
@@ -83,48 +88,38 @@ def printReport():
 	print "Nikkei 225: " + nikkeiprice
 	print "Nikkei 225 Change: " + nikkeichange 
 
+def sppRangeBound():
+	global spprice
+	spprice = (Style.BRIGHT + Fore.YELLOW + spprice)
+
+def sppSupportBroken():
+	global spprice, gasupport
+	spprice = (Style.BRIGHT + Fore.RED + spprice)
+	gasupport = (Style.BRIGHT + Fore.RED + gasupport)
+
+def sppResistanceBroken():
+	global spprice, garesistance
+	spprice = (Style.BRIGHT + Fore.GREEN + spprice)
+	garesistance = (Style.BRIGHT + Fore.RED + garesistance)
 
 
 mySoup = getSoup()
 myargs = getArgs()
 myFutures = getFutures()
-myReport = printReport()
+spprice2 = spprice.replace(',','') #there was a comma in there making it non-numeric
 
+if gacolorize is True and spprice2 >= gasupport and spprice2 <= garesistance: 
+	sppRangeBound()
+	myReport = printReport()
 
+if gacolorize is True and spprice2 <= gasupport:
+	sppSupportBroken()
+	myReport = printReport()
 
+if gacolorize is True and spprice2 >= garesistance:
+	sppResistanceBroken()
+	myReport = printReport()
 
-
-
-#target = soup.find("tbody", {"tr": "data-future-table-chart-symbol"}).span.contents
-#target = soup.find("tr", {"data-future-table-chart-symbol": "SP"}) #close
-#target = soup.find("td", {"class": "arrow"}).td.contents
-
-#return target[0]
-
-#futures = scraper(url)
-#print futures
-
-# i = 0
-# for p in target: #prints all the elements in the target list with line numbers to generate the map that I care about below.
-# 	print i, p
-# 	i += 1
-
-#Map
-#print soup
-#print target[3] #prints DJIA current price
-#print target[4] #prints DJIA up/down
-#S&P 500 min price = 12
-#S&P 500 mini change = 13
-#NASDAQ price = 21
-#NASDAQ change = 22
-#Mexican IPC price = 30
-#Mexican IPC change = 31
-#VG1:IND - Euro STOXX 50 = 75
-#EUroStoxx50 change = 76
-#FTSE 100, Z 1:IND, price 84, change 85
-#GX1:IND - DAX30 = 93, change 94
-#XU1:IND - FTSE China A50, price = 264, change 265
-#HI1:IND - Hang Seng, price = 273, change = 274
-#NK1:IND - Nikkei 225, price = 309, change = 310
+# -c is NOT specified - output broken.
 
 
