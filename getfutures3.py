@@ -11,6 +11,20 @@ url = 'http://www.bloomberg.com/markets/stocks/futures'
 gasupport = ""
 garesistance = ""
 target = ""
+dowprice = ""
+dowchange = ""
+spprice = ""
+spchange = ""
+nasdaqprice = ""
+nasdaqchange = ""
+europrice = ""
+eurochange  = ""
+ftseprice = "" 
+ftsechange = ""
+hangsengprice = ""
+hangsengchange = ""
+nikkeiprice = ""
+nikkeichange = ""
 
 
 def getArgs():
@@ -29,6 +43,23 @@ def getSoup():
 	soup = BeautifulSoup(page, 'html5lib')
 	target = soup.find("tr", {"class": "data-table__row"}) #gets DJIA instead of S&P 500
 	target = soup.find_all("td")
+
+def getFutures():
+	global dowprice, dowchange, spprice, spchange, nasdaqprice, nasdaqchange, europrice, ftseprice, ftsechange, hangsengprice, hangsengchange, nikkeiprice, nikkeichange
+	dowprice = str(target[3].text)
+	dowchange = str(target[4].text)
+	spprice = str(target[12].text)
+	spchange = str(target[13].text)
+	nasdaqprice = str(target[21].text)
+	nasdaqchange = str(target[22].text)
+	europrice = str(target[75].text)
+	eurochange = str(target[76].text)
+	ftseprice = str(target[84].text)
+	ftsechange = str(target[88].text)
+	hangsengprice = str(target[264].text)
+	hangsengchange = str(target[265].text)
+	nikkeiprice = str(target[309].text)
+	nikkeichange = str(target[310].text)
 
 def printReport():
 	print "Timestamp: %s" % (time.strftime('%Y-%m-%d %H:%M:%S'))
@@ -56,22 +87,7 @@ def printReport():
 
 mySoup = getSoup()
 myargs = getArgs()
-
-dowprice = str(target[3].text)
-dowchange = str(target[4].text)
-spprice = str(target[12].text)
-spchange = str(target[13].text)
-nasdaqprice = str(target[21].text)
-nasdaqchange = str(target[22].text)
-europrice = str(target[75].text)
-eurochange = str(target[76].text)
-ftseprice = str(target[84].text)
-ftsechange = str(target[88].text)
-hangsengprice = str(target[264].text)
-hangsengchange = str(target[265].text)
-nikkeiprice = str(target[309].text)
-nikkeichange = str(target[310].text)
-
+myFutures = getFutures()
 myReport = printReport()
 
 
