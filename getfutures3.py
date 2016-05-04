@@ -9,6 +9,7 @@ import re
 
 init(autoreset=True) #needed to clear and initalize colorama
 
+#url = 'http://www.cnbc.com/pre-markets/'
 url = 'http://www.bloomberg.com/markets/stocks/futures'
 gasupport = ""
 garesistance = ""
@@ -30,7 +31,7 @@ nikkeichange = ""
 gacolorize = ""
 
 
-def getArgs():
+def getArgs(): #returns command line arguments; support, resistance, colorize
 	global gasupport, garesistance, gacolorize
 	parser = ArgumentParser(description = 'Get Arguments')
 	parser.add_argument("-s", "--support", required=False, dest="support", help="Initialize S&P support level", metavar="support")
@@ -42,14 +43,14 @@ def getArgs():
 	gacolorize = args.colorize
 	return (gasupport, garesistance, gacolorize)
 
-def getSoup():
+def getSoup(): #returns a soup'd web-page 
 	global url, target
 	page = urllib2.urlopen(url)
 	soup = BeautifulSoup(page, 'html5lib')
 	target = soup.find("tr", {"class": "data-table__row"}) #gets DJIA instead of S&P 500
 	target = soup.find_all("td")
 
-def getFutures():
+def getFutures(): #returns futures pricies that I previously mapped by outputting everything to a txt file and tagging individual lines so that I could find everything  
 	global dowprice, dowchange, spprice, spchange, nasdaqprice, nasdaqchange, europrice, ftseprice, ftsechange, hangsengprice, hangsengchange, nikkeiprice, nikkeichange
 	dowprice = str(target[3].text)
 	dowchange = str(target[4].text)
@@ -88,16 +89,16 @@ def printReport():
 	print "Nikkei 225: " + nikkeiprice
 	print "Nikkei 225 Change: " + nikkeichange 
 
-def sppRangeBound():
+def sppRangeBound(): # sets spprice to yellow alert
 	global spprice
 	spprice = (Style.BRIGHT + Fore.YELLOW + spprice)
 
-def sppSupportBroken():
+def sppSupportBroken(): # sets support level break to red to indcate broken support level, and current price to red 
 	global spprice, gasupport
 	spprice = (Style.BRIGHT + Fore.RED + spprice)
 	gasupport = (Style.BRIGHT + Fore.RED + gasupport)
 
-def sppResistanceBroken():
+def sppResistanceBroken(): #sets resistance level break to red, and current price to greet
 	global spprice, garesistance
 	spprice = (Style.BRIGHT + Fore.GREEN + spprice)
 	garesistance = (Style.BRIGHT + Fore.RED + garesistance)
@@ -108,18 +109,17 @@ myargs = getArgs()
 myFutures = getFutures()
 spprice2 = spprice.replace(',','') #there was a comma in there making it non-numeric
 
-if gacolorize is True and spprice2 >= gasupport and spprice2 <= garesistance: 
-	sppRangeBound()
-	myReport = printReport()
-
-if gacolorize is True and spprice2 <= gasupport:
-	sppSupportBroken()
-	myReport = printReport()
-
-if gacolorize is True and spprice2 >= garesistance:
-	sppResistanceBroken()
-	myReport = printReport()
-
-# -c is NOT specified - output broken.
+if gacolorize is True:
+	if  spprice2 >= gasupport and spprice2 <= garesistance: #if the current price is between suppor and resistance run the sppragebound
+			sppRangeBound()
+		myReport = printReport()
+	elif spprice2 <= gasupport: #if support level has broken
+			sppSupportBroken()
+			myReport = printReport()
+	elif spprice2 >= garesistance: #if resistance level has broken
+			sppResistanceBroken()
+			myReport = printReport()
+else:
+	myReport = printReport() #if colorize flag not set, just print the report
 
 
