@@ -121,24 +121,29 @@ myargs = getArgs()
 myFutures = getFutures()
 spprice2 = spprice.replace(',','') #there was a comma in there making it non-numeric
 
-if gasupport >= 0 or garesistance >=0: #if you've specified -s 
-	if gaini is True:
+if gaini is True:
+	if gasupport >= 0 or garesistance >=0: #if you've specified -s 
 		print (Style.BRIGHT + Fore.YELLOW + duperrormessage)
 		gaConfigParser()
-else:
-	gaConfigParser()
+	else:
+		gaConfigParser()
 
 if gacolorize is True:
-	if  spprice2 >= gasupport and spprice2 <= garesistance: #if the current price is between suppor and resistance run the sppragebound
-			sppRangeBound()
+	if gasupport >= 0 or garesistance >=0: 
+		if  spprice2 >= gasupport and spprice2 <= garesistance: #if the current price is between suppor and resistance run the sppragebound
+				sppRangeBound()
+				myReport = printReport()
+		elif spprice2 <= gasupport: #if support level has broken
+				sppSupportBroken()
+				myReport = printReport()
+		elif spprice2 >= garesistance: #if resistance level has broken
+				sppResistanceBroken()
+				myReport = printReport()
+		else:
 			myReport = printReport()
-	elif spprice2 <= gasupport: #if support level has broken
-			sppSupportBroken()
-			myReport = printReport()
-	elif spprice2 >= garesistance: #if resistance level has broken
-			sppResistanceBroken()
-			myReport = printReport()
-else:
-	myReport = printReport() #if colorize flag not set, just print the report
+	else:
+		gasupport = "not set"
+		garesistance  = "not set"
+		myReport = printReport() #if colorize flag not set, just print the report
 
 
